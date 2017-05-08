@@ -145,7 +145,7 @@ __global__ void matrix_elementwise_add_kernel(const float *matA_data,
                                               index_t n) {
   index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
   if (idx < n) 
-    output_data[idx] = matA[idx] + matB[idx];
+    output_data[idx] = matA_data[idx] + matB_data[idx];
 }
 
 int DLGpuMatrixElementwiseAdd(const DLArrayHandle matA,
