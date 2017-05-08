@@ -219,9 +219,9 @@ int DLGpuMatrixElementwiseMultiply(const DLArrayHandle matA,
   int thread_per_block = 512;
   int n_blocks = (n + thread_per_block - 1) / thread_per_block;
   matrix_elementwise_multiply_kernel<<<n_blocks, thread_per_block>>>(matA_data, 
-                                                                matB_data, 
-                                                                output_data,
-                                                                n); 
+                                                                     matB_data, 
+                                                                     output_data,
+                                                                     n); 
   return 0;
 }
 
@@ -261,8 +261,26 @@ int DLGpuMatrixMultiply(const DLArrayHandle matA, bool transposeA,
   return 0;
 }
 
+
+__global__ void relu_kernel(const float *input_data, float *output_data, 
+                            index_t n) {
+  index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+  if (idx < n) 
+    output_data[idx] = input_data[idx] > 0 ? input_data[idx] : 0;
+}
+
 int DLGpuRelu(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
+  index_t n = 1;
+  for (int i = 0; i < output->ndim; i++)
+    n *= output->shape[i];
+
+  const float *input_data = (const float *) input->data;
+  float *output_data = (float *) output->data;
+  int thread_per_block = 512;
+  int n_blocks = (n + thread_per_block - 1) / thread_per_block;
+  relu_kernel<<<n_blocks, thread_per_block>>>(input_data, output_data, n);
+
   return 0;
 }
 
