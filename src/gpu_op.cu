@@ -56,7 +56,7 @@ __global__ void matrix_softmax_cross_entropy_kernel(int nrow, int ncol,
 __global__ void array_set_kernel(index_t n, float *data, float value) {
   index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
   if (idx < n)
-    data[i] = value;
+    data[idx] = value;
 }
 
 int DLGpuArraySet(DLArrayHandle arr, float value) { 
@@ -64,9 +64,11 @@ int DLGpuArraySet(DLArrayHandle arr, float value) {
   index_t n = 1;
   for (int i = 0; i < arr->ndim; i++)
     n *= arr->shape[i];
-
+  
   float *data = (float *) arr->data;
-  array_set_kernel<<<5, 200>>>(n, data, value);
+  int thread_per_block = 512;
+  int n_blocks = (n + thread_per_block - 1) / thread_per_block;
+  array_set_kernel<<<n_blocks, thread_per_block>>>(n, data, value);
   return 0;
 }
 
