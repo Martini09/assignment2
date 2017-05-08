@@ -138,9 +138,32 @@ int DLGpuReduceSumAxisZero(const DLArrayHandle input, DLArrayHandle output) {
   return 0;
 }
 
+
+__global__ void matrix_elementwise_add_kernel(const float *matA_data,
+                                              const float *matB_data,
+                                              float *output_data, 
+                                              index_t n) {
+  index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+  if (idx < n) 
+    output_data[idx] = matA[idx] + matB[idx];
+}
+
 int DLGpuMatrixElementwiseAdd(const DLArrayHandle matA,
                               const DLArrayHandle matB, DLArrayHandle output) {
   /* TODO: Your code here */
+  index_t n = 1;
+  for (int i = 0; i < output->ndim; i++)
+    n *= output->shape[i];
+
+  const float *matA_data = (const float *) matA->data;
+  const float *matB_data = (const float *) matB->data;
+  float *output_data = (float *) output->data;
+  int thread_per_block = 512;
+  int n_blocks = (n + thread_per_block - 1) / thread_per_block;
+  matrix_elementwise_add_kernel<<<n_blocks, thread_per_block>>>(matA_data, 
+                                                                matB_data, 
+                                                                output_data,
+                                                                n); 
   return 0;
 }
 
