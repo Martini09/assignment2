@@ -64,7 +64,7 @@ int DLGpuArraySet(DLArrayHandle arr, float value) {
   index_t n = 1;
   for (int i = 0; i < arr->ndim; i++)
     n *= arr->shape[i];
-  
+
   float *data = (float *) arr->data;
   int thread_per_block = 512;
   int n_blocks = (n + thread_per_block - 1) / thread_per_block;
@@ -72,8 +72,34 @@ int DLGpuArraySet(DLArrayHandle arr, float value) {
   return 0;
 }
 
+
+__global__ void broadcast_to_kernel(const float *input_data, 
+                                    float *output_data,
+                                    index_t input_n,
+                                    index_t output_n) {
+  index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+  if (idx < output_n) {
+    output_data[idx] = input_data[idx % input_n];
+  }
+}
+
 int DLGpuBroadcastTo(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
+  index_t input_n = 1;
+  for (int i = 0; i < input->ndim; i++)
+    input_n *= input->shape[i];
+
+  index_t output_n = 1;
+  for (int i = 0; i < output->ndim; i++)
+    output_n *= output->shape[i];
+
+  const float *input_data = (const float *) input->data;
+  float *output_data = (float *) output->data;
+
+  int thread_per_block = 512;
+  int n_blocks = (output_n + thread_per_block - 1) / thread_per_block;
+  broadcast_to_kernel<<<n_blocks, thread_per_block>>>(input_data, output_data,
+                                                      input_n, output_n);
   return 0;
 }
 
