@@ -115,6 +115,8 @@ __global__ void reduce_sum_axis_zero_kernel(const float *input_data,
 }
 
 int DLGpuReduceSumAxisZero(const DLArrayHandle input, DLArrayHandle output) {
+  DLGpuArraySet(output, 0.0);
+
   /* TODO: Your code here */
   index_t input_n = 1;
   for (int i = 0; i < input->ndim; i++)
