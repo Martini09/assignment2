@@ -182,7 +182,8 @@ if __name__ == '__main__':
     # test_array_set()
     # test_broadcast_to()
     # test_reduce_sum_axis_zero()
-    test_matrix_elementwise_add()
+    # test_matrix_elementwise_add()
+    test_matrix_elementwise_add_by_const()
 
 
 

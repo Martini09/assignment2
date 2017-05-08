@@ -174,7 +174,7 @@ __global__ void matrix_elementwise_add_by_const_kernel(const float *input_data,
                                                        index_t n) {
   index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
   if (idx < n) 
-    output_data[idx] = input_data[idx] * val;
+    output_data[idx] = input_data[idx] + val;
 }
 
 
