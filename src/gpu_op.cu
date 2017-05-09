@@ -1,6 +1,7 @@
 #include "./c_runtime_api.h"
 #include <cassert>
 #include <cstdio>
+#include <cmath>
 #include <cublas_v2.h>
 #include <cuda_runtime.h>
 
@@ -347,8 +348,47 @@ int DLGpuReluGradient(const DLArrayHandle input, const DLArrayHandle in_grad,
   return 0;
 }
 
+
+__global__ void softmax_kernel(const float *input_data, float *output_data,
+                               index_t row, index_t col) {
+  index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+  // Operate on each row
+  if (idx < row) {
+    // Find max
+    float max_val = input_data[idx*col];
+    for (int i = idx*col; i < (idx+1) * col; i++) 
+      max_val = max(max_val, input_data[i]);
+
+    // Subtract max and exp
+    float sum = 0.0;
+    for (int i = idx*col; i < (idx+1) * col; i++) {
+      output_data[i] = exp(input_data[i] - max_val);
+      sum += output_data[i];
+    }
+
+    // Divide sum of this row
+    for (int i = idx*col; i < (idx+1) * col; i++) 
+      output_data[i] /= sum;
+  }
+
+}
+
+
+__global__ void exp_kernel(float *output_data, index_t n) {
+  index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
+  if (idx < n) 
+    output_data[idx] = exp(input_data[idx]);
+}
+
 int DLGpuSoftmax(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
+  const float *input_data = (const float *) input->data;
+  float *output_data = (float *) output->data;
+
+  int n_blocks = output->shape[0];
+  softmax_kernel<<<n_blocks, 1>>>(input_data, output_data, output->shape[0],
+                                  output->shape[1]);
+
   return 0;
 }
 

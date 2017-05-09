@@ -185,7 +185,7 @@ if __name__ == '__main__':
     # test_matrix_elementwise_add()
     # test_matrix_elementwise_add_by_const()
     # test_relu_gradient()
-    test_matrix_multiply()
+    test_softmax()
 
 
 
