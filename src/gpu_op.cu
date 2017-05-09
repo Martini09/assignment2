@@ -286,11 +286,12 @@ int DLGpuRelu(const DLArrayHandle input, DLArrayHandle output) {
 
 
 __global__ void relu_gradient_kernel(const float *input_data, 
-                                     float *in_grad_data, 
+                                     const float *in_grad_data, 
+                                     float *output_data,
                                      index_t n) {
   index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
   if (idx < n) 
-    in_grad_data[idx] = input_data[idx] > 0 ? 1 : 0;
+    output_data[idx] = input_data[idx] > 0 ? in_grad_data[idx] : 0;
 }
 
 
@@ -302,11 +303,14 @@ int DLGpuReluGradient(const DLArrayHandle input, const DLArrayHandle in_grad,
     n *= input->shape[i];
 
   const float *input_data = (const float *) input->data;
-  float *in_grad_data = (float *) in_grad->data;
+  const float *in_grad_data = (const float *) in_grad->data;
+  float *output_data = (float *) output->data;
+
   int thread_per_block = 512;
   int n_blocks = (n + thread_per_block - 1) / thread_per_block;
   relu_gradient_kernel<<<n_blocks, thread_per_block>>>(input_data, 
                                                        in_grad_data,
+                                                       output_data,
                                                        n);
 
   return 0;
