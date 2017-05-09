@@ -373,13 +373,6 @@ __global__ void softmax_kernel(const float *input_data, float *output_data,
 
 }
 
-
-__global__ void exp_kernel(float *output_data, index_t n) {
-  index_t idx = blockDim.x * blockIdx.x + threadIdx.x;
-  if (idx < n) 
-    output_data[idx] = exp(input_data[idx]);
-}
-
 int DLGpuSoftmax(const DLArrayHandle input, DLArrayHandle output) {
   /* TODO: Your code here */
   const float *input_data = (const float *) input->data;
