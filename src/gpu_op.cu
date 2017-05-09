@@ -278,8 +278,8 @@ int DLGpuMatrixMultiply(const DLArrayHandle matA, bool transposeA,
   float beta = 0.0f;
   stat = cublasSgemm(handle, transb, transa,
                      m, n, k,
-                     &alpha, matB_data, m,
-                     matA_data, k, 
+                     &alpha, matB_data, matB->shape[1],
+                     matA_data, matA->shape[1], 
                      &beta, matC_data, m);
 
   if (stat != CUBLAS_STATUS_SUCCESS) 
