@@ -282,7 +282,7 @@ int DLGpuMatrixMultiply(const DLArrayHandle matA, bool transposeA,
                      matA_data, k, 
                      &beta, matC_data, m);
 
-  if (status != CUBLAS_STATUS_SUCCESS) 
+  if (stat != CUBLAS_STATUS_SUCCESS) 
     printf("CUBLAS kernel execution error.\n");
 
   stat = cublasDestroy(handle);
