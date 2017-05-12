@@ -651,7 +651,7 @@ class Executor(object):
         """
         """TODO: Your code here"""
         for node in self.topo_order:
-            if node in feed_dict:
+            if node in feed_shapes:
                 continue
 
             shape = self.node_to_shape_map[node]
@@ -710,7 +710,7 @@ class Executor(object):
             if node in node_to_val_map:
                 # Skip placeholder nodes. Values already provided by feed_dict.
                 continue
-                
+
             input_vals = [node_to_val_map[n] for n in node.inputs]
             if use_numpy:
                 node_val = np.empty(shape=self.node_to_shape_map[node])
