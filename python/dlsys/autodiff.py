@@ -650,6 +650,7 @@ class Executor(object):
         feed_shapes: node->shapes mapping for feed_dict nodes.
         """
         """TODO: Your code here"""
+        self.node_to_arr_map = {}
         for node in self.topo_order:
             if node in feed_shapes:
                 continue
