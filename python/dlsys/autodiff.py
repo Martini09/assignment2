@@ -215,8 +215,14 @@ class MulOp(Op):
         """Need to handle input_vals[0].shape != input_vals[1].shape"""
         """TODO: Your code here"""
         assert len(input_shapes) == 2
-        assert input_shapes[0] == input_shapes[1]
-        return input_shapes[0]
+        if input_shapes[0] == input_shapes[1]:
+            return input_shapes[0]
+        elif input_shapes[0] == (1,):
+            return input_shapes[1]
+        elif input_shapes[1] == (1,):
+            return input_shapes[0]
+        else:
+            print 'shape error'
 
 
 class MulByConstOp(Op):
@@ -624,7 +630,6 @@ class Executor(object):
 
             input_shapes = [self.node_to_shape_map[n] for n in node.inputs]
             self.node_to_shape_map[node] = node.op.infer_shape(node, input_shapes)
-
 
     def memory_plan(self, feed_shapes):
         """Allocates ndarray.NDArray for every node except feed_dict nodes.
