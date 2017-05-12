@@ -629,7 +629,8 @@ class Executor(object):
                 continue
 
             input_shapes = [self.node_to_shape_map[n] for n in node.inputs]
-            self.node_to_shape_map[node] = node.op.infer_shape(node, input_shapes)
+            self.node_to_shape_map[node] = node.op.infer_shape(node, 
+                                                               input_shapes)
 
     def memory_plan(self, feed_shapes):
         """Allocates ndarray.NDArray for every node except feed_dict nodes.
@@ -649,7 +650,12 @@ class Executor(object):
         feed_shapes: node->shapes mapping for feed_dict nodes.
         """
         """TODO: Your code here"""
+        for node in self.topo_order:
+            if node in feed_dict:
+                continue
 
+            shape = self.node_to_shape_map[node]
+            self.node_to_arr_map[node] = ndarray.empty(shape, ctx=self.ctx)
 
     def run(self, feed_dict, convert_to_numpy_ret_vals=False):
         """
@@ -704,6 +710,7 @@ class Executor(object):
             if node in node_to_val_map:
                 # Skip placeholder nodes. Values already provided by feed_dict.
                 continue
+                
             input_vals = [node_to_val_map[n] for n in node.inputs]
             if use_numpy:
                 node_val = np.empty(shape=self.node_to_shape_map[node])
